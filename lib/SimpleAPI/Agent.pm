@@ -6,7 +6,6 @@ use Moose::Util::TypeConstraints;
 use LWP::UserAgent;
 use JSON::Any;
 use URI;
-use Data::Dumper;
 
 has 'user_agent' => ( 
     isa => duck_type([qw/get post/]), is => 'ro',
@@ -49,6 +48,7 @@ sub request {
 sub do_request {
     my ( $self, $method, $uri, $data ) = @_;
     my $req_method = q{_} . lc $method . '_request';
+    $data ||= {};
     if ( $self->can($req_method) ) {
         return $self->$req_method($uri, $data);
     }
@@ -93,7 +93,62 @@ __END__
 
 =head1 NAME
 
+SimpleAPI::Agent - Role for custom user agents
+
+=head1 SYNOPSIS
+
+    package MyApp::Model::ServiceApp;
+
+    use Moose;
+    use namespace::autoclean;
+
+    extends 'Catalyst::Model';
+
+    with 'SimpleAPI::Agent';
+
+    __PACKAGE__->config(
+        api_key => 'AE281S228D4',
+        application_id => 'myapp',
+        api_base_url => 'http://localhost:5000/'
+    );
+
+    1;
+
 =head1 DESCRIPTION
+
+A role for building custom user agents which provides a C<request> method to
+interface with L<CatalystX::SimpleAPI> apps.
+
+=head1 ATTRIBUTES
+
+=over
+
+=item api_key
+
+String used as authorization token.
+
+=item application_id
+
+Application's identification which can be a number, UUID, name, etc.
+
+=item api_base_url
+
+Base URL to send request to. That is concatenated with the path supplied as arg
+on the call to C<request>.
+
+=back
+
+=head1 METHODS
+
+=over
+
+=item C< request( $relative_path, $params?, $http_method? ) >
+
+=item C< do_request( $http_method, $uri_obj, $params? ) >
+
+=item C< handle_response( $http_response_obj ) >
+
+=back
 
 =head1 AUTHOR & LICENSE
 

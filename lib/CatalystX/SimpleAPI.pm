@@ -8,16 +8,82 @@ __END__
 
 =head1 NAME
 
-CatalystX::SimpleAPI
+CatalystX::SimpleAPI - Simple API support for Catalyst apps
 
 =head1 SYNOPSIS
 
+    package ServiceApp::Controller::API;
+
+    use Moose;
+    use namespace::autoclean;
+    BEGIN { extends 'Catalyst::Controller' }
+
+    with 'CatalystX::Controller::SimpleAPI';
+
+    __PACKAGE__->config(
+        authkeys => {
+            'AE281S228D4' => {
+                ip_check => qr/^10\.0\.0\.[0-9]+$/,
+                valid_applications => [qw/simple-test/],
+            },
+        },
+    );
+
+    sub auto : Private {
+        my ( $self, $c ) = @_;
+
+        # will return false if the api did not pass authorization.
+        return $self->prepare_api_request($c);
+    }
+
+    sub foo : Local {
+        my ( $self, $c ) = @_;
+        $c->stash(
+            api_response => {
+                processed => 1,
+                status => 'success',
+                data => {
+                    results => $c->req->params,
+                }
+            },
+        );
+    }
+
+    1;
+
+    ...
+
+    package MyApp::Model::ServiceApp; 
+
+    use Moose;
+    use namespace::autoclean;
+
+    extends 'Catalyst::Model';
+
+    with 'SimpleAPI::Agent';
+
+    __PACKAGE__->config(
+        api_key => 'AE281S228D4',
+        application_id => 'myapp',
+        api_base_url => 'http://localhost:5000/'
+    );
+
+    1;
+
+    ...
+
+    $c->model('ServiceApp')->request('/api/foo', { value => 10 });
+
 =head1 DESCRIPTION
+
+It provides a simple API support - currently JSON based - for Catalyst
+applications.
 
 =head1 USAGE
 
-In your actions, all your API arguments will have already been placed in C<< $c->stash->{'api_params'} >>.
-Your API response will be placed in C<< $c->stash->{'api_response'} >>.  The C<api_response> hash should 
+In your actions, all your API arguments will have already been placed in
+C<< $c->stash->{'api_params'} >>. Your API response will be placed in
+C<< $c->stash->{'api_response'} >>. The C<api_response> hash should 
 have the following structure.
 
     $c->stash->{'api_response'} => {
@@ -28,47 +94,27 @@ have the following structure.
         data => {},          # hashref containing the results of the api action
         
         errors => {           # error messages in the form of field => 'message' in the case of an error
-                    general => 'failed validation' # 'general' should always be present to describe the overall error
-                    ingredient => 'Ingredient is invalid.', # per-parameter error messaging if appropriate.
-        }
-    }
+            general => 'failed validation' # 'general' should always be present to describe the overall error
+            ingredient => 'Ingredient is invalid.', # per-parameter error messaging if appropriate.
+        },
+    };
 
-If you process your request, you should set C<processed> to B<1> even if the request was did not
-have a successful result.  The C<processed> value is used to indicate that the parameters
-were accepted and the action requested was attempted.  The C<status> value is used to indicate
-whether the requested action accomplished what was requested.  The basic rule of thumb here
-is that C<processed> should only be set to B<0> if the action could not be started for some reason
-(such as auth failure or other exceptional condition.)  Note that if C<processed> is B<0>, C<status>
+If you process your request, you should set C<processed> to B<1> even if the
+request was did not have a successful result.  The C<processed> value is used to
+indicate that the parameters were accepted and the action requested was attempted.
+The C<status> value is used to indicate whether the requested action accomplished
+what was requested.  The basic rule of thumb here is that C<processed> should only
+be set to B<0> if the action could not be started for some reason (such as auth
+failure or other exceptional condition.)  Note that if C<processed> is B<0>, C<status>
 will ALWAYS be B<failed>.  
 
 In your subclass, you will need to call the C<< $self->prepare_api_request($c) >> 
 method to initialize the API request. This is usually done in the C<auto>
-action or the root of the action chain. Note that authorization failure sets
-up the response, but does B<NOT> send it to the browser. The example below
-uses the end action to do that.  If you use C<< $self->return_api_data($c) >>
-somewhere else, you will need to check the return value of
-C<prepare_api_request> and ensure C<return_api_data> is called yourself.
-
-Your basic SimpleAPI derived controller should look like this:
-
-    sub auto : Private {
-        my ( $self, $c ) = @_;
-
-        # will return false if the api did not pass authorization.
-        return $self->prepare_api_request($c);
-    }
-
-    sub end : Private {
-        my ( $self, $c ) = @_;
-        
-        return $self->return_api_data($c);
-    }
-
-
+action or the root of the action chain.
 
 =head1 AUTHOR
 
-Jay Kuri <jayk@cpan.org>
+Jay Kuri (jayk) C<< <jayk@cpan.org> >>.
 
 =head1 CONTRIBUTORS
 

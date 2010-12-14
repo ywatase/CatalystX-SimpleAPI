@@ -1,10 +1,10 @@
 use inc::Module::Install;
 
-name     'CatalystX::SimpleAPI';
+name     'CatalystX-SimpleAPI';
 all_from 'lib/CatalystX/SimpleAPI.pm';
 author   q{Jay Kuri <jayk@cpan.org>};
 license  'perl';
-repository 'git://github.com/wreis/CatalystX--SimpleAPI.git';
+repository 'git://github.com/wreis/CatalystX-SimpleAPI.git';
 
 test_requires 'Test::More';
 test_requires 'MooseX::Declare';
