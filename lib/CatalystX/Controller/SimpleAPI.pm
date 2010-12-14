@@ -4,9 +4,15 @@ use MooseX::MethodAttributes::Role;
 use namespace::autoclean;
 use JSON::XS ();
 
-has authkeys => (
-    isa => 'HashRef', is => 'ro', required => 1,
+has _authkeys => (
+    init_arg => 'authkeys', isa => 'HashRef',
+    is => 'ro', required => 0,
 );
+
+sub _auth_config {
+    my ( $self, $c ) = @_;
+    return $self->_authkeys || $c->config->{'authkeys'} || {};
+}
 
 sub prepare_api_request : Private {
     my ( $self, $c ) = @_;
@@ -23,20 +29,21 @@ sub prepare_api_request : Private {
         data => {},
     };
 
+    my $auth_config = $self->_auth_config($c);
     my $provided_authkey = $c->stash->{'api_params'}{'authkey'} || 'unknown';
     my $authkey_ip_check;
-    if (exists($self->authkeys->{$provided_authkey})) {
-        $c->stash->{'api_authorization'} = $self->authkeys->{$provided_authkey};
-        if (exists($self->authkeys->{$provided_authkey}{'ip_check'})) {
-            $authkey_ip_check = $self->authkeys->{$provided_authkey}{'ip_check'};
+    if (exists($auth_config->{$provided_authkey})) {
+        $c->stash->{'api_authorization'} = $auth_config->{$provided_authkey};
+        if (exists($auth_config->{$provided_authkey}{'ip_check'})) {
+            $authkey_ip_check = $auth_config->{$provided_authkey}{'ip_check'};
         } else {
-            $authkey_ip_check = $self->authkeys->{$provided_authkey};
+            $authkey_ip_check = $auth_config->{$provided_authkey};
         }
     }
     
     if (defined($authkey_ip_check) && ( $c->req->address =~ $authkey_ip_check)) {
-         if ( !grep { $c->stash->{'api_params'}{'application'} eq $_ }
-             @{$c->stash->{'api_authorization'}{'valid_applications'}}
+         unless ( $c->stash->{'api_params'}{'application'}
+             =~ $c->stash->{'api_authorization'}{'valid_applications'}
          ) {
             $c->stash->{'api_response'} = {
                 processed => 0,
@@ -109,7 +116,7 @@ CatalystX::Controller::SimpleAPI - Catalyst controller for a simple API
         authkeys => {
             'AE281S228D4' => {
                 ip_check => qr/^10\.0\.0\.[0-9]+$/,
-                valid_applications => [qw/myapp myapp_test/],
+                valid_applications => qr/myapp/,
             },
         },
     );
@@ -129,10 +136,10 @@ Catalyst Controller that implements a JSON based API.
 
 =head1 CONFIGURATION
 
-C<authkeys> are a mapping of authorization keys and a regex to be used to verify
-the clients address. For a request to the API to be valid, it must contain a
-valid authkey, and the origin IP must match the  regex associated with the
-authkey provided.  
+C<authkeys> are a mapping of authorization keys, and an IP and application
+identification regexes. For a request to the API to be valid, it must contain a
+valid authkey, and the origin IP and app id must match the regexes associated
+with the authkey provided.
 
 If no authkeys configuration for the controller is provided, it will fall back
 to using the global C<authkeys> element of the application config.
