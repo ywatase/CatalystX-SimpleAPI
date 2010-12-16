@@ -112,6 +112,10 @@ In your subclass, you will need to call the C<< $self->prepare_api_request($c) >
 method to initialize the API request. This is usually done in the C<auto>
 action or the root of the action chain.
 
+=head1 SEE ALSO
+
+L<Catalyst Advent Calendar 2009|http://www.catalystframework.org/calendar/2009/21>
+
 =head1 AUTHOR
 
 Jay Kuri (jayk) C<< <jayk@cpan.org> >>.

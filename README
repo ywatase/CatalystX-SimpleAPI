@@ -102,6 +102,10 @@ USAGE
     This is usually done in the "auto" action or the root of the action
     chain.
 
+SEE ALSO
+    Catalyst Advent Calendar 2009
+    <http://www.catalystframework.org/calendar/2009/21>
+
 AUTHOR
     Jay Kuri (jayk) "<jayk@cpan.org>".
 
