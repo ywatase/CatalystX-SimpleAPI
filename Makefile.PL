@@ -1,9 +1,11 @@
 use inc::Module::Install;
+use Module::Install::ReadmeFromPod;
 
 name     'CatalystX-SimpleAPI';
 all_from 'lib/CatalystX/SimpleAPI.pm';
 author   q{Jay Kuri <jayk@cpan.org>};
 license  'perl';
+readme_from;
 repository 'git://github.com/wreis/CatalystX-SimpleAPI.git';
 
 test_requires 'Test::More';
@@ -18,11 +20,6 @@ requires 'JSON::XS';
 requires 'LWP::UserAgent';
 requires 'JSON::Any';
 requires 'URI';
-
-if ($Module::Install::AUTHOR) {
-    system("pod2text lib/CatalystX/SimpleAPI.pm > README")
-        and die $!
-}
 
 auto_install;
 
