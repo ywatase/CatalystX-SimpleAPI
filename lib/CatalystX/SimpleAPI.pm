@@ -23,8 +23,8 @@ CatalystX::SimpleAPI - Simple API support for Catalyst apps
     __PACKAGE__->config(
         authkeys => {
             'AE281S228D4' => {
-                ip_check => qr/^10\.0\.0\.[0-9]+$/,
-                valid_applications => [qw/simple-test/],
+                ip_check => '^10\.0\.0\.[0-9]+$',
+                valid_applications => 'myapp',
             },
         },
     );

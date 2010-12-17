@@ -10,8 +10,8 @@ with 'CatalystX::Controller::SimpleAPI';
 __PACKAGE__->config(
     authkeys => {
         'AE281S228D4' => {
-            ip_check => qr/^127/,
-            valid_applications => qr/simple/,
+            ip_check => '^127',
+            valid_applications => 'simple',
         },
     },
 );

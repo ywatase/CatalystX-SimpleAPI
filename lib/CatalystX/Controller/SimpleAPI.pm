@@ -41,10 +41,9 @@ sub prepare_api_request : Private {
         }
     }
     
-    if (defined($authkey_ip_check) && ( $c->req->address =~ $authkey_ip_check)) {
-         unless ( $c->stash->{'api_params'}{'application'}
-             =~ $c->stash->{'api_authorization'}{'valid_applications'}
-         ) {
+    if (defined($authkey_ip_check) && ( $c->req->address =~ /$authkey_ip_check/)) {
+        my $valid_apps = $c->stash->{'api_authorization'}{'valid_applications'};
+        unless ( $c->stash->{'api_params'}{'application'} =~ m/$valid_apps/i ) {
             $c->stash->{'api_response'} = {
                 processed => 0,
                 status => 'failed',
@@ -115,8 +114,8 @@ CatalystX::Controller::SimpleAPI - Catalyst controller for a simple API
     __PACKAGE__->config(
         authkeys => {
             'AE281S228D4' => {
-                ip_check => qr/^10\.0\.0\.[0-9]+$/,
-                valid_applications => qr/myapp/,
+                ip_check => '^10\.0\.0\.[0-9]+$',
+                valid_applications => 'myapp',
             },
         },
     );
