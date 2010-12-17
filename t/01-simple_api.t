@@ -53,7 +53,7 @@ try {
     $res = $api_model->request('/api/return_error', { value => 10 });
 }
 catch {
-    like $_, qr{Error in API};
+    like $_->{'general'}[0], qr{Error in API};
 };
 
 try {

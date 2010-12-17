@@ -77,8 +77,7 @@ sub handle_response {
             || (exists($response_data->{'status'})
                 && $response_data->{'status'} ne 'success') 
         ) {
-            my @errors = values(%{$response_data->{errors}});
-            confess join("\n", map @$_, @errors);
+            confess $response_data->{'errors'};
         } else {
             return $response_data->{'data'};
         }
