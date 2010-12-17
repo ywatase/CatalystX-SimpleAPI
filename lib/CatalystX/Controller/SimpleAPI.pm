@@ -73,9 +73,9 @@ sub return_api_data : Private {
 
 sub end : Private {
     my ( $self, $c ) = @_; 
-        
-    if (!$c->res->body()) {
-        if ($#{$c->error} == -1) {
+    my $res = $c->res;
+    unless ( defined $res->body && length $res->body ) {
+        if (!scalar @{$c->error}) {
             return $self->return_api_data($c);
         } else {
             $c->stash->{'api_response'} = {
