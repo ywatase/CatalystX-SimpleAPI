@@ -131,7 +131,7 @@ CatalystX::Controller::SimpleAPI - Catalyst controller for a simple API
 
 =head1 DESCRIPTION
 
-Catalyst Controller that implements a JSON based API.
+Catalyst Controller that implements (currently only) a JSON based API.
 
 =head1 CONFIGURATION
 

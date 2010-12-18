@@ -76,7 +76,7 @@ CatalystX::SimpleAPI - Simple API support for Catalyst apps
 
 =head1 DESCRIPTION
 
-It provides a simple API support - currently JSON based - for Catalyst
+It provides a simple API support - currently only JSON based - for Catalyst
 applications.
 
 =head1 USAGE
@@ -86,16 +86,24 @@ C<< $c->stash->{'api_params'} >>. Your API response will be placed in
 C<< $c->stash->{'api_response'} >>. The C<api_response> hash should 
 have the following structure.
 
-    $c->stash->{'api_response'} => {
-        processed => 0,      # true / false value indicating the request was processed.
-        
-        status => 'failed',  # 'success' or 'failed' indicating whether the request was processed successfully.
-        
-        data => {},          # hashref containing the results of the api action
-        
-        errors => {           # error messages in the form of field => 'message' in the case of an error
-            general => 'failed validation' # 'general' should always be present to describe the overall error
-            ingredient => 'Ingredient is invalid.', # per-parameter error messaging if appropriate.
+    $c->stash->{'api_response'} = {
+        # true / false value indicating the request was processed.
+        processed => 0,
+
+        # 'success' or 'failed' indicating whether the request was processed
+        # successfully.
+        status => 'failed',
+    
+        # hashref containing the results of the api action
+        data => {},
+
+        # error messages in the form of field => 'message' in the case of an error
+        errors => {
+            # 'general' should always be present to describe the overall error
+            general => 'failed validation',
+
+            # per-parameter error messaging if appropriate.
+            ingredient => 'Ingredient is invalid.',
         },
     };
 
