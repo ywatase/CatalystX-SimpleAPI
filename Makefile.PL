@@ -9,16 +9,17 @@ repository 'git://github.com/wreis/CatalystX-SimpleAPI.git';
 
 test_requires 'Test::More';
 test_requires 'MooseX::Declare';
-test_requires 'Try::Tiny';
+test_requires 'CatalystX::RoleApplicator';
+test_requires 'Catalyst::TraitFor::Request::DecodedParams';
 
 requires 'Catalyst::Runtime' => '5.80029';
 requires 'Moose';
 requires 'namespace::autoclean';
 requires 'MooseX::MethodAttributes';
-requires 'JSON::XS';
 requires 'LWP::UserAgent';
 requires 'JSON::Any';
 requires 'URI';
+requires 'Try::Tiny';
 
 auto_install;
 

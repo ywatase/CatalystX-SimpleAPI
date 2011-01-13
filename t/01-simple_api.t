@@ -2,10 +2,13 @@ use strict;
 use warnings;
 use lib 't/lib';
 use Test::More;
-use Catalyst::Test 'Simple';
 use HTTP::Request::Common ();
 use MooseX::Declare;
 use Try::Tiny;
+
+BEGIN {
+    use_ok 'Catalyst::Test', 'Simple';
+}
 
 my ( $res, $c ) = ctx_request('/');
 
@@ -16,26 +19,19 @@ my $api_model_class = class {
 
         with 'SimpleAPI::Agent';
 
-        sub do_request {
-            my ( $self, $method, $uri, $data ) = @_;
-            my $req_method = 'HTTP::Request::Common::' . $method;
-            {
-                no strict 'refs';
-                if ( $method eq 'GET' ) {
-                    $uri->query_form($data);
-                    return Catalyst::Test::local_request(
-                        $class, &$req_method($uri)
-                    );
-                }
-                elsif ( $method eq 'POST' ) {
-                    return Catalyst::Test::local_request(
-                        $class, &$req_method($uri, $data)
-                    );
-                }
-                else {
-                    confess "$method not supported";
-                }
-            }
+        sub _get_request {
+            my ( $self, $uri, $data ) = @_;
+            $uri->query_form($data);
+            return Catalyst::Test::local_request(
+                $class, HTTP::Request::Common::GET($uri)
+            );
+        }
+
+        sub _post_request {
+            my ( $self, $uri, $data ) = @_;
+            return Catalyst::Test::local_request(
+                $class, HTTP::Request::Common::POST($uri, $data)
+            );
         }
 
 };
@@ -45,9 +41,14 @@ my $api_model = $api_model_class->name->new($c, {
     api_base_url => $c->req->base->as_string,
 });
 
-$res = $api_model->request('/api/foo', { value => 10 });
-ok(exists $res->{'results'}{'value'});
-ok($res->{'results'}{'value'} == 10);
+my $param = {
+    value => {
+        bar => 1,
+        baz => 1,
+    },
+};
+$res = $api_model->request('/api/foo', $param);
+is_deeply($res, $param->{'value'});
 
 try {
     $res = $api_model->request('/api/return_error', { value => 10 });

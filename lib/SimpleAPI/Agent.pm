@@ -7,6 +7,8 @@ use LWP::UserAgent;
 use JSON::Any;
 use URI;
 
+our $VERSION = '0.02';
+
 has 'user_agent' => ( 
     isa => duck_type([qw/get post/]), is => 'ro',
     lazy => 1, builder => '_build_user_agent',
@@ -27,10 +29,31 @@ has 'json_decoder' => (
 
 sub _build_json_decoder { return JSON::Any->new }
 
+has 'json_encoder' => (
+    isa => duck_type([qw/encode/]), is => 'ro',
+    lazy => 1, builder => '_build_json_encoder',
+);
+
+sub _build_json_encoder { return JSON::Any->new->utf8->pretty(1) }
+
+sub _serialize_params {
+    my ( $self, $param ) = @_;
+    $param ||= {};
+    my $json_encoder = $self->json_encoder;
+    foreach my $key ( keys %$param ) {
+        my $data = $param->{$key};
+        next unless ref $data;
+        $param->{$key} = $json_encoder->encode($data);
+    }
+    return $param;
+}
+
 sub request {
     my ( $self, $path, $data, $method ) = @_;
-    $method = uc($method || 'POST');
+    confess 'The params needs to be in a hashref'
+        if defined $data && ref($data) ne 'HASH';
     $data ||= {};
+    $method = uc($method || 'POST');
     $data->{'application'} = $self->application_id;
     if (!defined($data->{'authkey'})) {
         $data->{'authkey'} = $self->api_key;
@@ -47,8 +70,10 @@ sub request {
 
 sub do_request {
     my ( $self, $method, $uri, $data ) = @_;
+    confess 'The params needs to be in a hashref'
+        if defined $data && ref($data) ne 'HASH';
+    $data = $self->_serialize_params({ %$data });
     my $req_method = q{_} . lc $method . '_request';
-    $data ||= {};
     if ( $self->can($req_method) ) {
         return $self->$req_method($uri, $data);
     }

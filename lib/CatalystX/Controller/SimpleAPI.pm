@@ -2,7 +2,9 @@ package CatalystX::Controller::SimpleAPI;
 
 use MooseX::MethodAttributes::Role;
 use namespace::autoclean;
-use JSON::XS ();
+use JSON::Any;
+
+our $VERSION = '0.02';
 
 has _authkeys => (
     init_arg => 'authkeys', isa => 'HashRef',
@@ -66,7 +68,7 @@ sub return_api_data : Private {
      my ( $self, $c ) = @_;
     $c->response->header('Cache-Control' => 'no-cache');
     $c->response->header('application/json');
-    my $jsonobject = JSON::XS->new->utf8->pretty(1);
+    my $jsonobject = JSON::Any->new->utf8->pretty(1);
     my $responsetext = $jsonobject->encode($c->stash->{'api_response'});
     $c->response->body($responsetext);
 }

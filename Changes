@@ -1,0 +1,7 @@
+Revision history for CatalystX::SimpleAPI
+
+0.02    13 Jan 2011
+    - Add JSON serialization of request params
+
+0.01    18 Dec 2010
+    - First release
