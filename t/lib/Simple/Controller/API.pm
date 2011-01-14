@@ -27,7 +27,7 @@ sub foo : Local {
         api_response => {
             processed => 1,
             status => 'success',
-            data => $c->req->decoded_param->{'value'},
+            data => $c->req->decoded_params->{'value'},
         },
     );
 }

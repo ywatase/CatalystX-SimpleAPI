@@ -5,6 +5,7 @@ use Test::More;
 use HTTP::Request::Common ();
 use MooseX::Declare;
 use Try::Tiny;
+use utf8;
 
 BEGIN {
     use_ok 'Catalyst::Test', 'Simple';
@@ -43,6 +44,7 @@ my $api_model = $api_model_class->name->new($c, {
 
 my $param = {
     value => {
+        foo => 'áçéò',
         bar => 1,
         baz => 1,
     },

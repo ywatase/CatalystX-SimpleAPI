@@ -34,7 +34,7 @@ has 'json_encoder' => (
     lazy => 1, builder => '_build_json_encoder',
 );
 
-sub _build_json_encoder { return JSON::Any->new->utf8->pretty(1) }
+sub _build_json_encoder { return JSON::Any->new }
 
 sub _serialize_params {
     my ( $self, $param ) = @_;

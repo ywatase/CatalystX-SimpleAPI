@@ -68,7 +68,7 @@ sub return_api_data : Private {
      my ( $self, $c ) = @_;
     $c->response->header('Cache-Control' => 'no-cache');
     $c->response->header('application/json');
-    my $jsonobject = JSON::Any->new->utf8->pretty(1);
+    my $jsonobject = JSON::Any->new;
     my $responsetext = $jsonobject->encode($c->stash->{'api_response'});
     $c->response->body($responsetext);
 }
