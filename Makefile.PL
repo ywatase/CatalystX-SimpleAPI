@@ -1,5 +1,6 @@
 use inc::Module::Install;
 use Module::Install::ReadmeFromPod;
+use Module::Install::AuthorTests;
 
 name     'CatalystX-SimpleAPI';
 all_from 'lib/CatalystX/SimpleAPI.pm';
@@ -20,6 +21,8 @@ requires 'LWP::UserAgent';
 requires 'JSON::Any';
 requires 'URI';
 requires 'Try::Tiny';
+
+author_tests('t/author');
 
 auto_install;
 

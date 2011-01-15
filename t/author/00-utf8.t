@@ -5,6 +5,7 @@ use Test::More;
 use HTTP::Request::Common ();
 use MooseX::Declare;
 use Try::Tiny;
+use utf8;
 
 BEGIN {
     use_ok 'Catalyst::Test', 'Simple';
@@ -42,26 +43,9 @@ my $api_model = $api_model_class->name->new($c, {
 });
 
 my $param = {
-    value => {
-        bar => 1,
-        baz => 1,
-    },
+    value => { foo => 'áçéò' },
 };
 $res = $api_model->request('/api/foo', $param);
 is_deeply($res, $param->{'value'});
-
-try {
-    $res = $api_model->request('/api/return_error', { value => 10 });
-}
-catch {
-    like $_->{'general'}[0], qr{Error in API};
-};
-
-try {
-    $res = $api_model->request('/api/foo', { value => 10 }, 'HEAD');
-}
-catch {
-    like $_, qr{HEAD not supported};
-};
 
 done_testing;
