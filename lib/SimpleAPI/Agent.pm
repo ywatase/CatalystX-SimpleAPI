@@ -1,37 +1,38 @@
 package SimpleAPI::Agent;
-
-use Moose::Role;
+use Moo::Role;
+use MooX::Types::MooseLike::Base qw(:all);
 use namespace::autoclean;
-use Moose::Util::TypeConstraints;
 use LWP::UserAgent;
 use JSON::Any;
 use URI;
+use Carp;
+use Data::Dumper;
 
 our $VERSION = '0.02';
 
-has 'user_agent' => ( 
-    isa => duck_type([qw/get post/]), is => 'ro',
-    lazy => 1, builder => '_build_user_agent',
+has 'user_agent' => (
+    is  => 'lazy',
+    isa => HasMethods [qw/get post/],
 );
 
 sub _build_user_agent { return LWP::UserAgent->new }
-                
-has 'api_key' => ( isa => 'Str', is => 'ro', required => 1 );
 
-has 'application_id' => ( isa => 'Str', is => 'ro', required => 1 );
+has 'api_key' => ( isa => Str, is => 'ro', required => 1 );
 
-has 'api_base_url' => ( isa => 'Str', is => 'ro', required => 1 );
+has 'application_id' => ( isa => Str, is => 'ro', required => 1 );
+
+has 'api_base_url' => ( isa => Str, is => 'ro', required => 1 );
 
 has 'json_decoder' => (
-    isa => duck_type([qw/jsonToObj/]), is => 'ro',
-    lazy => 1, builder => '_build_json_decoder',
+    is  => 'lazy',
+    isa => HasMethods [qw/jsonToObj/],
 );
 
 sub _build_json_decoder { return JSON::Any->new }
 
 has 'json_encoder' => (
-    isa => duck_type([qw/encode/]), is => 'ro',
-    lazy => 1, builder => '_build_json_encoder',
+    is  => 'lazy',
+    isa => HasMethods [qw/encode/],
 );
 
 sub _build_json_encoder { return JSON::Any->new }
@@ -53,29 +54,27 @@ sub request {
     confess 'The params needs to be in a hashref'
         if defined $data && ref($data) ne 'HASH';
     $data ||= {};
-    $method = uc($method || 'POST');
+    $method = uc( $method || 'POST' );
     $data->{'application'} = $self->application_id;
-    if (!defined($data->{'authkey'})) {
+    if ( !defined( $data->{'authkey'} ) ) {
         $data->{'authkey'} = $self->api_key;
     }
     my $base_url = $self->api_base_url;
     $base_url =~ s{/$}{}g;
     $path =~ s{^/}{}g;
-    my $uri = URI->new(join(q{/}, $base_url, $path));
+    my $uri = URI->new( join( q{/}, $base_url, $path ) );
 
-    return $self->handle_response(
-        $self->do_request($method, $uri, $data)
-    );
+    return $self->handle_response( $self->do_request( $method, $uri, $data ) );
 }
 
 sub do_request {
     my ( $self, $method, $uri, $data ) = @_;
     confess 'The params needs to be in a hashref'
         if defined $data && ref($data) ne 'HASH';
-    $data = $self->_serialize_params({ %$data });
+    $data = $self->_serialize_params( {%$data} );
     my $req_method = q{_} . lc $method . '_request';
     if ( $self->can($req_method) ) {
-        return $self->$req_method($uri, $data);
+        return $self->$req_method( $uri, $data );
     }
     else {
         confess "$method not supported";
@@ -83,30 +82,35 @@ sub do_request {
 }
 
 sub _get_request {
-    my ( $self, $uri, $data) = @_; 
+    my ( $self, $uri, $data ) = @_;
     $uri->query_form($data);
     return $self->user_agent->get($uri);
 }
 
 sub _post_request {
-    my ( $self, $uri, $data ) = @_; 
-    return $self->user_agent->post($uri, $data);
+    my ( $self, $uri, $data ) = @_;
+    return $self->user_agent->post( $uri, $data );
 }
 
 sub handle_response {
     my ( $self, $response ) = @_;
     if ( $response->is_success ) {
-        my $response_data = $self->json_decoder->jsonToObj($response->content);
-        if ( (exists($response_data->{'processed'})
-                && $response_data->{'processed'} == 0)
-            || (exists($response_data->{'status'})
-                && $response_data->{'status'} ne 'success') 
-        ) {
+        my $response_data
+            = $self->json_decoder->jsonToObj( $response->content );
+        if ((   exists( $response_data->{'processed'} )
+                && $response_data->{'processed'} == 0
+            )
+            || ( exists( $response_data->{'status'} )
+                && $response_data->{'status'} ne 'success' )
+            )
+        {
             confess $response_data->{'errors'};
-        } else {
+        }
+        else {
             return $response_data->{'data'};
         }
-    } else {
+    }
+    else {
         confess 'Request to SimpleAPI failed: ' . $response->status_line;
     }
 }
