@@ -2,6 +2,7 @@ package Simple::Controller::API;
 
 use Moose;
 use namespace::autoclean;
+use JSON::Any;
 
 BEGIN { extends 'Catalyst::Controller' }
 
@@ -23,11 +24,12 @@ sub auto : Private {
 
 sub foo : Local {
     my ( $self, $c ) = @_;
+    my $j = JSON::Any->new;
     $c->stash(
         api_response => {
             processed => 1,
             status => 'success',
-            data => $c->req->decoded_params->{'value'},
+            data => $j->decode($c->req->param('value')),
         },
     );
 }
