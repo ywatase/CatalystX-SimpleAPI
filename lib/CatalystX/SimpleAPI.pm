@@ -1,6 +1,7 @@
 package CatalystX::SimpleAPI;
 
 our $VERSION = '0.04';
+use 5.010;
 
 1;
 

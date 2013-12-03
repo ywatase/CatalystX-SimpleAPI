@@ -2,13 +2,17 @@ package CatalystX::Controller::SimpleAPI;
 
 use MooseX::MethodAttributes::Role;
 use namespace::autoclean;
-use JSON::Any;
+use Plack::SimpleAPI;
 
 our $VERSION = '0.03';
 
 has _authkeys => (
     init_arg => 'authkeys', isa => 'HashRef',
     is => 'ro', required => 0,
+);
+
+has simpleapi => (
+    isa => 'Plack::SimpleAPI', is => 'rw',
 );
 
 sub _auth_config {
@@ -18,80 +22,28 @@ sub _auth_config {
 
 sub prepare_api_request : Private {
     my ( $self, $c ) = @_;
-
-    if (!exists($c->stash->{'api_params'})) {
-        $c->stash->{'api_params'} = $c->req->params;
-    }
-    $c->stash->{'api_params'}{'output'} = 'json';
-    
-    ## This sets the default response as a failure.  
-    $c->stash->{'api_response'} = {
-        processed => 0,
-        status => 'failed',
-        data => {},
-    };
-
-    my $auth_config = $self->_auth_config($c);
-    my $provided_authkey = $c->stash->{'api_params'}{'authkey'} || 'unknown';
-    my $authkey_ip_check;
-    if (exists($auth_config->{$provided_authkey})) {
-        $c->stash->{'api_authorization'} = $auth_config->{$provided_authkey};
-        if (exists($auth_config->{$provided_authkey}{'ip_check'})) {
-            $authkey_ip_check = $auth_config->{$provided_authkey}{'ip_check'};
-        } else {
-            $authkey_ip_check = $auth_config->{$provided_authkey};
-        }
-    }
-    
-    if (defined($authkey_ip_check) && ( $c->req->address =~ /$authkey_ip_check/)) {
-        my $valid_apps = $c->stash->{'api_authorization'}{'valid_applications'};
-        unless ( $c->stash->{'api_params'}{'application'} =~ m/$valid_apps/i ) {
-            $c->stash->{'api_response'} = {
-                processed => 0,
-                status => 'failed',
-                errors => {
-                    general => [ 'Authorization failed' ],
-                },
-            };
-            return 0;
-        }
-        return 1;
-    } else {
-        $c->stash->{'api_response'}{'errors'} = {
-            'general' => [ 'Service not available, check your configuration' ],
-        };
-        return 0;
-    }
+    $self->simpleapi(Plack::SimpleAPI->new($c->req->env));
+    $self->simpleapi->auth_config($self->_auth_config);
+    $self->simpleapi->prepare_api_request;
 }
 
 sub return_api_data : Private {
-     my ( $self, $c ) = @_;
-    $c->response->header('Cache-Control' => 'no-cache');
-    $c->response->content_type('application/json');
-    my $jsonobject = JSON::Any->new;
-    my $responsetext = $jsonobject->encode($c->stash->{'api_response'});
-    $c->response->body($responsetext);
+    my ( $self, $c ) = @_;
+    $c->res->from_psgi_response($self->simpleapi->return_api_data);
 }
 
 sub end : Private {
     my ( $self, $c ) = @_; 
     my $res = $c->res;
+    if ($c->stash->{api_response}) {
+        $self->simpleapi->response($c->stash->{api_response});
+    }
     unless ( defined $res->body && length $res->body ) {
-        if (!scalar @{$c->error}) {
-            return $self->return_api_data($c);
-        } else {
-            $c->stash->{'api_response'} = {
-                processed => 0,
-                status => 'failed',
-                errors => {
-                    general => [
-                        'An unrecoverable error occurred: ' . $c->error->[0],
-                    ],
-                },
-            };
+        if (scalar @{$c->error}) {
+            $self->simpleapi->make_unrecoverable_error_api_response($c->error->[0]);
             $c->clear_errors;
-            return $self->return_api_data($c);
-        }   
+        }
+        return $self->return_api_data($c);
     }   
 }
 
