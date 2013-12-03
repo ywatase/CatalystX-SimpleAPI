@@ -12,5 +12,6 @@ repository 'git://github.com/wreis/CatalystX-SimpleAPI.git';
 author_tests('t/author');
 
 auto_install;
+cpanfile;
 
 WriteAll;

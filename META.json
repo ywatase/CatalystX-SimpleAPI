@@ -1,0 +1,69 @@
+{
+   "abstract" : "Simple API support for Catalyst apps",
+   "author" : [
+      "Jay Kuri (jayk) C<< <jayk@cpan.org> >>.",
+      "Jay Kuri <jayk@cpan.org>"
+   ],
+   "dynamic_config" : "0",
+   "generated_by" : "Module::Install version 1.06, CPAN::Meta::Converter version 2.132830",
+   "license" : [
+      "perl_5"
+   ],
+   "meta-spec" : {
+      "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+      "version" : "2"
+   },
+   "name" : "CatalystX-SimpleAPI",
+   "no_index" : {
+      "directory" : [
+         "inc",
+         "t"
+      ]
+   },
+   "prereqs" : {
+      "build" : {
+         "requires" : {
+            "ExtUtils::MakeMaker" : "6.59"
+         }
+      },
+      "configure" : {
+         "requires" : {
+            "CPAN::Meta" : "0",
+            "ExtUtils::MakeMaker" : "6.59"
+         }
+      },
+      "develop" : {
+         "requires" : {
+            "Module::Install" : "0",
+            "Module::Install::AuthorTests" : "0",
+            "Module::Install::CPANfile" : "0",
+            "Module::Install::ReadmeFromPod" : "0"
+         }
+      },
+      "runtime" : {
+         "requires" : {
+            "JSON::Any" : "0",
+            "namespace::autoclean" : "0",
+            "perl" : "v5.10.0"
+         }
+      },
+      "test" : {
+         "requires" : {
+            "Catalyst::Runtime" : "5.90051",
+            "Test::More" : "0",
+            "Try::Tiny" : "0"
+         }
+      }
+   },
+   "release_status" : "stable",
+   "resources" : {
+      "license" : [
+         "http://dev.perl.org/licenses/"
+      ],
+      "repository" : {
+         "type" : "git",
+         "url" : "git://github.com/wreis/CatalystX-SimpleAPI.git"
+      }
+   },
+   "version" : "0.05"
+}
