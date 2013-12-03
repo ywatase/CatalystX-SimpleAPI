@@ -1,5 +1,5 @@
 {
-   "abstract" : "Simple API support for Catalyst apps",
+   "abstract" : "unknown",
    "author" : [
       "Jay Kuri (jayk) C<< <jayk@cpan.org> >>.",
       "Jay Kuri <jayk@cpan.org>"
@@ -13,7 +13,7 @@
       "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
       "version" : "2"
    },
-   "name" : "CatalystX-SimpleAPI",
+   "name" : "Plack-SimpleAPI",
    "no_index" : {
       "directory" : [
          "inc",
@@ -62,7 +62,7 @@
       ],
       "repository" : {
          "type" : "git",
-         "url" : "git://github.com/wreis/CatalystX-SimpleAPI.git"
+         "url" : "git://github.com/ywatase/CatalystX-SimpleAPI.git"
       }
    },
    "version" : "0.05"

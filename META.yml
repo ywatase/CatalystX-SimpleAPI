@@ -1,5 +1,5 @@
 ---
-abstract: 'Simple API support for Catalyst apps'
+abstract: unknown
 author:
   - 'Jay Kuri (jayk) C<< <jayk@cpan.org> >>.'
   - 'Jay Kuri <jayk@cpan.org>'
@@ -17,7 +17,7 @@ license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
   version: 1.4
-name: CatalystX-SimpleAPI
+name: Plack-SimpleAPI
 no_index:
   directory:
     - inc
@@ -28,5 +28,5 @@ requires:
   perl: v5.10.0
 resources:
   license: http://dev.perl.org/licenses/
-  repository: git://github.com/wreis/CatalystX-SimpleAPI.git
+  repository: git://github.com/ywatase/CatalystX-SimpleAPI.git
 version: 0.05
