@@ -1,6 +1,12 @@
 requires 'namespace::autoclean';
 requires 'JSON::Any';
 
+on develop => sub {
+    requires 'Module::Install';
+    requires 'Module::Install::ReadmeFromPod';
+    requires 'Module::Install::AuthorTests';
+    requires 'Module::Install::CPANfile';
+};
 on test => sub {
     requires 'Catalyst::Runtime' => '5.90051';
     requires 'Try::Tiny';
